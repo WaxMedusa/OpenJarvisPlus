@@ -139,8 +139,13 @@ class ElevenLabsTTSBackend(TTSBackend):
         self._api_key = _normalize_api_key(
             api_key or os.environ.get("ELEVENLABS_API_KEY", "")
         )
-        self._model = model or os.environ.get(
-            "ELEVENLABS_MODEL", "eleven_multilingual_v2"
+        # ``ELEVENLABS_MODEL_ID`` is the name the original double-clap script
+        # used; accept it as a fallback so an existing .env keeps its model.
+        self._model = (
+            model
+            or os.environ.get("ELEVENLABS_MODEL", "")
+            or os.environ.get("ELEVENLABS_MODEL_ID", "")
+            or "eleven_multilingual_v2"
         )
         self._voice_id = voice_id or os.environ.get("ELEVENLABS_VOICE_ID", "")
 

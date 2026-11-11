@@ -1639,6 +1639,54 @@ class SpeechConfig:
 
 
 @dataclass(slots=True)
+class WakeConfig:
+    """Resident ``jarvis wake`` session: arrival ritual and voice behaviour."""
+
+    song_uri: str = (
+        "https://open.spotify.com/track/6sstcO05hV8WqTVz0Xm5er"
+        "?si=14f82650f0064b2f"
+    )
+    welcome_phrase: str = (
+        "Welcome home sir. Congratulations on the new client for your SaaS app"
+        "—make sure to follow up. If it helps: a short, specific note while the"
+        " deal is still fresh usually anchors trust better than a polished deck"
+        " sent cold a few days later."
+    )
+    #: Cache synthesized WAVs under ``<config-dir>/wake/tts_cache``.
+    welcome_cache: bool = True
+    after_song_delay_s: float = 1.0
+    focus_cursor: bool = True
+    cursor_fullscreen: bool = True
+    #: Pages to open in Chrome during the ritual (one new window each).
+    open_urls: List[str] = field(default_factory=list)
+    chrome_monitor: int = 1
+    honorific: str = "sir"
+    #: Read the machine checkup aloud after the ritual.
+    brief_on_wake: bool = True
+    #: Include today's Google Calendar events when the connector is connected.
+    include_calendar: bool = True
+    #: Speak a short summary of every answer instead of the full text.
+    speak_summaries: bool = True
+
+
+@dataclass(slots=True)
+class PCConfig:
+    """Machine-control policy for the resident operator."""
+
+    #: "ask" (default), "trusted" or "read_only". ``jarvis wake --trusted``
+    #: overrides this for one run.
+    autonomy: str = "ask"
+    #: Explicit Steam installation root; empty means auto-detect.
+    steam_root: str = ""
+    #: Minutes to keep verifying Steam updates before giving up.
+    steam_watch_minutes: int = 90
+    shell_timeout_s: int = 90
+    allow_shell: bool = True
+    #: Extra regexes refused even in trusted mode (added to the built-ins).
+    deny_patterns: List[str] = field(default_factory=list)
+
+
+@dataclass(slots=True)
 class OptimizeConfig:
     """Configuration optimization settings."""
 
@@ -1792,6 +1840,8 @@ class JarvisConfig:
     a2a: A2AConfig = field(default_factory=A2AConfig)
     operators: OperatorsConfig = field(default_factory=OperatorsConfig)
     speech: SpeechConfig = field(default_factory=SpeechConfig)
+    wake: WakeConfig = field(default_factory=WakeConfig)
+    pc: PCConfig = field(default_factory=PCConfig)
     optimize: OptimizeConfig = field(default_factory=OptimizeConfig)
     agent_manager: AgentManagerConfig = field(default_factory=AgentManagerConfig)
     memory_files: MemoryFilesConfig = field(default_factory=MemoryFilesConfig)
@@ -2122,6 +2172,8 @@ def load_config(path: Optional[Path] = None) -> JarvisConfig:
             "a2a",
             "operators",
             "speech",
+            "wake",
+            "pc",
             "optimize",
             "agent_manager",
             "digest",

@@ -132,6 +132,7 @@ if not _DATA_BOUNDARY_BOOTSTRAP:
     from openjarvis.cli.telemetry_cmd import telemetry
     from openjarvis.cli.tool_cmd import tool
     from openjarvis.cli.vault_cmd import vault
+    from openjarvis.cli.wake_cmd import wake
     from openjarvis.cli.workflow_cmd import workflow
 
     cli.add_command(init, "init")
@@ -150,6 +151,7 @@ if not _DATA_BOUNDARY_BOOTSTRAP:
     cli.add_command(doctor, "doctor")
     cli.add_command(agent, "agents")
     cli.add_command(workflow, "workflow")
+    cli.add_command(wake, "wake")
     cli.add_command(skill, "skill")
     cli.add_command(start, "start")
     cli.add_command(stop, "stop")

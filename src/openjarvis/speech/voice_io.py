@@ -80,6 +80,57 @@ def record_until_silence(
     return _frames_to_wav(frames, sample_rate)
 
 
+def record_stream(
+    stream,
+    *,
+    sample_rate: int,
+    block_samples: int,
+    silence_threshold: int = _SILENCE_THRESHOLD,
+    silence_seconds: float = _SILENCE_SECONDS,
+    startup_silence_seconds: float = _STARTUP_SILENCE_SECONDS,
+    max_seconds: float = _MAX_RECORD_SECONDS,
+    should_stop=None,
+) -> bytes:
+    """Record from an already-open stream until silence.
+
+    Used by the resident wake session so the clap detector and the recorder
+    share one microphone stream (two simultaneous WASAPI input streams from the
+    same device are unreliable on Windows). The returned WAV keeps the capture
+    sample rate; STT backends decode and resample it themselves.
+    """
+    chunks_per_second = sample_rate / max(1, block_samples)
+    silence_chunks = int(silence_seconds * chunks_per_second)
+    startup_silence_chunks = max(1, int(startup_silence_seconds * chunks_per_second))
+    max_chunks = int(max_seconds * chunks_per_second)
+
+    frames: list[bytes] = []
+    silence_count = 0
+    has_speech = False
+
+    for _ in range(max_chunks):
+        if should_stop is not None and should_stop():
+            break
+        data, _overflow = stream.read(block_samples)
+        try:
+            raw = data.tobytes() if hasattr(data, "tobytes") else bytes(data)
+        except (AttributeError, TypeError):
+            break
+        frames.append(raw)
+
+        amplitude = _rms(raw)
+        if amplitude > silence_threshold:
+            has_speech = True
+            silence_count = 0
+        elif not has_speech and len(frames) >= startup_silence_chunks:
+            break
+        elif has_speech:
+            silence_count += 1
+            if silence_count >= silence_chunks:
+                break
+
+    return _frames_to_wav(frames, sample_rate)
+
+
 def _frames_to_wav(frames: list[bytes], sample_rate: int) -> bytes:
     buf = io.BytesIO()
     with wave.open(buf, "wb") as wf:
@@ -123,4 +174,4 @@ def play_wav(audio: bytes, sample_rate: int = 24000) -> None:
     sd.wait()
 
 
-__all__ = ["play_wav", "record_until_silence"]
+__all__ = ["play_wav", "record_stream", "record_until_silence"]

@@ -85,6 +85,24 @@ jarvis digest --fresh          # generate and play your first briefing
 
 Per-preset deep dives: [morning digest](https://open-jarvis.github.io/OpenJarvis/user-guide/morning-digest/) · [deep research](https://open-jarvis.github.io/OpenJarvis/user-guide/deep-research/) · [code assistant](https://open-jarvis.github.io/OpenJarvis/user-guide/code-assistant/) · [scheduled monitor](https://open-jarvis.github.io/OpenJarvis/user-guide/scheduled-monitor/) · [chat simple](https://open-jarvis.github.io/OpenJarvis/user-guide/chat-simple/) · or the full [quickstart guide](https://open-jarvis.github.io/OpenJarvis/getting-started/quickstart/).
 
+### Resident JARVIS (`jarvis wake`)
+
+`jarvis wake` is the always-on operator: one process owns the microphone, keeps
+your ElevenLabs voice, and can actually act on the PC.
+
+```bash
+pip install -e ".[speech]"
+jarvis wake            # terminal
+jarvis wake --ui       # small desktop panel
+jarvis wake --install-startup   # start with Windows, no console window
+```
+
+Double clap once for the arrival ritual and a machine checkup (Steam updates,
+winget updates, disk). Double clap again to ask for something, e.g. "check my
+Steam games and update anything that needs it". Installations and shell
+commands ask first by default; every action is written to
+`~/.openjarvis/wake/audit.jsonl`. See the [Resident JARVIS guide](https://open-jarvis.github.io/OpenJarvis/user-guide/wake/).
+
 ### Skills
 
 Skills teach agents how to better use tools and improve their reasoning. Every skill is a tool — agents discover them from a catalog and invoke them on demand.
