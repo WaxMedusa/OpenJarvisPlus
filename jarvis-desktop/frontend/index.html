@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Jarvis</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <div class="app">
+      <header class="bar">
+        <div class="brand">
+          <span class="mark">J</span>
+          <span class="name">JARVIS</span>
+          <span class="sub">desktop</span>
+        </div>
+        <div class="bar-actions">
+          <span id="pill" class="pill" data-state="off">
+            <span class="dot"></span>
+            <span id="pill-text">offline</span>
+          </span>
+          <button id="toggle" class="btn" type="button">Start listening</button>
+          <button id="trigger" class="btn ghost" type="button">Test sequence</button>
+        </div>
+      </header>
+
+      <main class="grid">
+        <section class="panel status">
+          <div class="panel-head">
+            <h2>Microphone</h2>
+            <span id="device" class="muted" title="Input device">no device</span>
+          </div>
+
+          <div class="meter-wrap">
+            <div class="meter">
+              <div id="meter-fill" class="meter-fill"></div>
+              <div id="meter-threshold" class="meter-threshold" title="Clap threshold"></div>
+            </div>
+            <div class="meter-labels">
+              <span>level <b id="level-value">0.000</b></span>
+              <span>trigger <b id="threshold-value">–</b></span>
+            </div>
+          </div>
+
+          <div class="stage">
+            <span id="pip-1" class="pip">1</span>
+            <span id="pip-2" class="pip">2</span>
+            <span id="stage-text" class="muted">clap twice</span>
+          </div>
+
+          <dl class="stats">
+            <div><dt>claps</dt><dd id="claps">0</dd></div>
+            <div><dt>double claps</dt><dd id="doubles">0</dd></div>
+            <div><dt>last trigger</dt><dd id="last-trigger">–</dd></div>
+          </dl>
+
+          <p id="listener-note" class="note">Start the listener to arm the microphone.</p>
+        </section>
+
+        <section class="settings">
+          <details class="panel" open>
+            <summary>Trigger<span class="hint">microphone + detection</span></summary>
+            <div class="fields">
+              <label class="field wide">
+                <span>Input device</span>
+                <select id="device-select"><option value="">default / auto</option></select>
+              </label>
+              <label class="field">
+                <span>Spike ratio</span>
+                <input id="spike_ratio" type="number" min="1.5" max="50" step="0.5" />
+              </label>
+              <label class="field">
+                <span>Min RMS</span>
+                <input id="min_rms" type="number" min="0" max="1" step="0.001" />
+              </label>
+              <label class="field">
+                <span>Max gap (s)</span>
+                <input id="max_gap_s" type="number" min="0.05" max="3" step="0.01" />
+              </label>
+              <label class="field">
+                <span>Cooldown (s)</span>
+                <input id="cooldown_s" type="number" min="0.05" max="10" step="0.05" />
+              </label>
+              <label class="check wide">
+                <input id="auto_start" type="checkbox" />
+                <span>Listen automatically when Jarvis starts</span>
+              </label>
+            </div>
+          </details>
+
+          <details class="panel">
+            <summary>Sequence<span class="hint">what a double clap launches</span></summary>
+            <div class="fields">
+              <label class="check wide">
+                <input id="open_song" type="checkbox" />
+                <span>Open a song / playlist</span>
+              </label>
+              <label class="field wide">
+                <span>Song URL</span>
+                <input id="song_uri" type="url" placeholder="spotify:track:… or https://…" />
+              </label>
+              <div class="wide targets-head">
+                <span class="label">Chrome windows</span>
+                <button id="add-target" class="btn small ghost" type="button">+ Add</button>
+              </div>
+              <div id="targets" class="wide targets"></div>
+              <label class="check">
+                <input id="focus_cursor" type="checkbox" />
+                <span>Focus Cursor</span>
+              </label>
+              <label class="check">
+                <input id="new_cursor_window" type="checkbox" />
+                <span>New Cursor window</span>
+              </label>
+              <label class="check">
+                <input id="cursor_fullscreen" type="checkbox" />
+                <span>Cursor fullscreen</span>
+              </label>
+            </div>
+          </details>
+
+          <details class="panel">
+            <summary>Voice<span class="hint">ElevenLabs</span></summary>
+            <div class="fields">
+              <label class="check wide">
+                <input id="voice_enabled" type="checkbox" />
+                <span>Speak after the sequence starts</span>
+              </label>
+              <label class="field wide">
+                <span>Phrase</span>
+                <textarea id="phrase" rows="3"></textarea>
+              </label>
+              <label class="field">
+                <span>Voice ID</span>
+                <input id="voice_id" type="text" autocomplete="off" />
+              </label>
+              <label class="field">
+                <span>Model</span>
+                <input id="voice_model" type="text" autocomplete="off" />
+              </label>
+              <label class="field">
+                <span>Delay (s)</span>
+                <input id="voice_delay" type="number" min="0" max="30" step="0.5" />
+              </label>
+              <label class="check">
+                <input id="voice_cache" type="checkbox" />
+                <span>Cache audio</span>
+              </label>
+              <div class="field wide">
+                <span>API key <em id="key-status" class="muted">not set</em></span>
+                <div class="key-row">
+                  <input id="api_key" type="password" placeholder="sk_…" autocomplete="off" />
+                  <button id="save-key" class="btn small" type="button">Save</button>
+                  <button id="clear-key" class="btn small ghost" type="button">Clear</button>
+                </div>
+              </div>
+              <div class="wide">
+                <button id="preview-voice" class="btn small ghost" type="button">Preview voice</button>
+              </div>
+            </div>
+          </details>
+        </section>
+      </main>
+
+      <section class="panel log-panel">
+        <div class="panel-head">
+          <h2>Activity</h2>
+          <span id="saved" class="saved">saved</span>
+        </div>
+        <ul id="log" class="log"></ul>
+      </section>
+
+      <footer class="foot">
+        <span>Jarvis <b id="version">–</b></span>
+        <span id="data-path" class="muted">–</span>
+      </footer>
+    </div>
+    <div id="toast" class="toast" hidden></div>
+    <script src="/app.js" defer></script>
+  </body>
+</html>

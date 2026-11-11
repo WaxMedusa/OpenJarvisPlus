@@ -1,0 +1,48 @@
+name: Jarvis Desktop
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "jarvis-desktop/**"
+      - ".github/workflows/jarvis-desktop.yml"
+
+jobs:
+  build:
+    runs-on: windows-latest
+    defaults:
+      run:
+        working-directory: jarvis-desktop
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev,build]"
+
+      - name: Test
+        run: python -m pytest tests -q
+
+      - name: Build app
+        run: python -m PyInstaller --clean --noconfirm packaging/jarvis-desktop.spec
+
+      - name: Install Inno Setup
+        run: choco install innosetup --no-progress -y
+
+      - name: Build installer
+        shell: pwsh
+        run: |
+          $version = (Select-String -Path jarvis_desktop/__init__.py -Pattern '__version__\s*=\s*"([^"]+)"').Matches[0].Groups[1].Value
+          & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" "/DAppVersion=$version" "packaging\installer.iss"
+
+      - name: Upload installer
+        uses: actions/upload-artifact@v4
+        with:
+          name: JarvisSetup
+          path: jarvis-desktop/dist/JarvisSetup-*.exe
+          if-no-files-found: error
